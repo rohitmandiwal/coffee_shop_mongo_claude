@@ -9,7 +9,9 @@
       "Bash(npm install)",
       "Bash(npm run build:*)",
       "Bash(npx create-next-app:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(npx ts-node --version)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

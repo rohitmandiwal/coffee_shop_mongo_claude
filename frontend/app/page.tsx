@@ -33,6 +33,18 @@ export default function Home() {
             </CardContent>
           </Card>
         </Link>
+
+        <Link href="/orders">
+          <Card className="cursor-pointer hover:shadow-lg transition">
+            <CardHeader>
+              <CardTitle>📦 Orders</CardTitle>
+              <CardDescription>Manage customer orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Create, track, and manage customer orders with itemized details and payment status.</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   )

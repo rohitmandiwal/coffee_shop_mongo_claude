@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/components/ui/toast'
 import { getMenuItems, deleteMenuItem, toggleMenuItemAvailability, MenuItem } from '@/lib/api/menu'
+import { formatCurrency } from '@/lib/utils/format'
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([])
@@ -107,7 +108,7 @@ export default function MenuPage() {
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.category}</TableCell>
                   <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                  <TableCell>${item.price.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(item.price)}</TableCell>
                   <TableCell>
                     <Badge
                       variant={item.isAvailable ? 'success' : 'destructive'}

@@ -26,18 +26,34 @@ export interface Customer {
     createdAt: Date;
     updatedAt: Date;
 }
+export declare enum OrderStatus {
+    Created = "Created",
+    Paid = "Paid"
+}
+export declare enum PaymentMode {
+    Cash = "Cash",
+    UPI = "UPI",
+    Card = "Card"
+}
 export interface Order {
     _id?: ObjectId;
     customerId: ObjectId;
+    orderDate: Date;
+    status: OrderStatus;
     items: OrderItem[];
-    totalPrice: number;
-    status: 'pending' | 'completed' | 'cancelled';
+    subTotal: number;
+    discount?: number;
+    tax?: number;
+    grandTotal: number;
+    paymentMode?: PaymentMode;
     createdAt: Date;
     updatedAt: Date;
 }
 export interface OrderItem {
     menuItemId: ObjectId;
+    itemNameSnapshot: string;
+    unitPriceSnapshot: number;
     quantity: number;
-    price: number;
+    lineTotal: number;
 }
 //# sourceMappingURL=entities.types.d.ts.map
