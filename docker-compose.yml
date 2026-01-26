@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:noble
+    container_name: coffee_shop_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: coffee_shop
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - coffee-app
+    healthcheck:
+      test: echo 'db.adminCommand("ping")' | mongosh -u root -p password --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: coffee_shop_backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGO_URI: mongodb://root:password@mongodb:27017/coffee_shop?authSource=admin
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_EXPIRATION: 24h
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: info
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - coffee-app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: coffee_shop_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - coffee-app
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
+networks:
+  coffee-app:
+    driver: bridge

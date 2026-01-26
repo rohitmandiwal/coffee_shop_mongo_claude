@@ -1,0 +1,28 @@
+version: '3.9'
+
+# Development Docker Compose - MongoDB only
+# Use this when developing locally with `npm run dev`
+# Run: docker-compose -f docker-compose.dev.yml up
+
+services:
+  mongodb:
+    image: mongo:noble
+    container_name: coffee_shop_mongodb_dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: coffee_shop
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data_dev:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.adminCommand("ping")' | mongosh -u root -p password --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo_data_dev:
+    driver: local
