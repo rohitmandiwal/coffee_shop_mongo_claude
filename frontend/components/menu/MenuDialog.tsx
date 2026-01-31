@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/toast'
 import { menuFormSchema, MenuFormData } from '@/lib/schemas/menu'
@@ -81,7 +80,11 @@ export function MenuDialog({ item, onSuccess }: MenuDialogProps) {
 
           <div>
             <Label htmlFor="category">Category</Label>
-            <Select {...register('category')} id="category">
+            <select
+              id="category"
+              {...register('category')}
+              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <option value="">Select a category</option>
               <option value="Coffee">Coffee</option>
               <option value="Tea">Tea</option>
@@ -89,7 +92,7 @@ export function MenuDialog({ item, onSuccess }: MenuDialogProps) {
               <option value="Sandwich">Sandwich</option>
               <option value="Dessert">Dessert</option>
               <option value="Beverage">Beverage</option>
-            </Select>
+            </select>
             {errors.category && <span className="text-red-600 text-sm">{errors.category.message}</span>}
           </div>
 

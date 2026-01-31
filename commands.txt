@@ -1,0 +1,80 @@
+Seed database
+
+docker-compose exec backend node dist/scripts/seed.js
+
+⏺ Here are the commands to build and deploy the entire Docker setup:                                                                                                                      
+                                                                                                                                                                                          
+  Single Command (Recommended)                                                                                                                                                            
+                                                                                                                                                                                          
+  docker-compose up --build -d                                                                                                                                                            
+                                                                                                                                                                                          
+  This will:                                                                                                                                                                              
+  - Build backend image (from ./backend/Dockerfile)                                                                                                                                       
+  - Build frontend image (from ./frontend/Dockerfile)                                                                                                                                     
+  - Pull MongoDB image                                                                                                                                                                    
+  - Create volumes and networks                                                                                                                                                           
+  - Start all 4 services in detached mode (background)                                                                                                                                    
+                                                                                                                                                                                          
+  ---                                                                                                                                                                                     
+  Step-by-Step Commands                                                                                                                                                                   
+                                                                                                                                                                                          
+  # Step 1: Build all images (without cache)                                                                                                                                              
+  docker-compose build --no-cache                                                                                                                                                         
+                                                                                                                                                                                          
+  # Step 2: Start all services in background                                                                                                                                              
+  docker-compose up -d                                                                                                                                                                    
+                                                                                                                                                                                          
+  # Step 3: Check status                                                                                                                                                                  
+  docker-compose ps                                                                                                                                                                       
+                                                                                                                                                                                          
+  # Step 4: View logs                                                                                                                                                                     
+  docker-compose logs -f                                                                                                                                                                  
+                                                                                                                                                                                          
+  ---                                                                                                                                                                                     
+  Full Deployment Workflow                                                                                                                                                                
+                                                                                                                                                                                          
+  # Navigate to project directory                                                                                                                                                         
+  cd /Users/rohitmandiwal/WorkSpace/Playground/claude/mongo_app                                                                                                                           
+                                                                                                                                                                                          
+  # Clean up old containers/volumes (optional - only if you want fresh DB)                                                                                                                
+  docker-compose down -v                                                                                                                                                                  
+                                                                                                                                                                                          
+  # Build and deploy in one command                                                                                                                                                       
+  docker-compose up --build -d                                                                                                                                                            
+                                                                                                                                                                                          
+  # Verify all services are running                                                                                                                                                       
+  docker-compose ps                                                                                                                                                                       
+                                                                                                                                                                                          
+  # Check backend logs for seeding                                                                                                                                                        
+  docker-compose logs backend                                                                                                                                                             
+                                                                                                                                                                                          
+  ---                                                                                                                                                                                     
+  Useful Commands After Deployment                                                                                                                                                        
+                                                                                                                                                                                          
+  # View all logs                                                                                                                                                                         
+  docker-compose logs -f                                                                                                                                                                  
+                                                                                                                                                                                          
+  # View specific service logs                                                                                                                                                            
+  docker-compose logs -f backend                                                                                                                                                          
+  docker-compose logs -f frontend                                                                                                                                                         
+  docker-compose logs -f nginx                                                                                                                                                            
+  docker-compose logs -f mongodb                                                                                                                                                          
+                                                                                                                                                                                          
+  # Stop all services                                                                                                                                                                     
+  docker-compose down                                                                                                                                                                     
+                                                                                                                                                                                          
+  # Stop and remove volumes (delete database)                                                                                                                                             
+  docker-compose down -v                                                                                                                                                                  
+                                                                                                                                                                                          
+  # Rebuild just one service                                                                                                                                                              
+  docker-compose build --no-cache backend                                                                                                                                                 
+  docker-compose up -d backend                                                                                                                                                            
+                                                                                                                                                                                          
+  # Check resource usage                                                                                                                                                                  
+  docker stats                                                                                                                                                                            
+                                                                                                                                                                                          
+  ---                                                                                                                                                                                     
+  For production deployment, use:                                                                                                                                                         
+  docker-compose up --build -d                                                                                                                                                            
+                                                                                                                                                                                          
+  This is the simplest and most reliable way! 🚀        

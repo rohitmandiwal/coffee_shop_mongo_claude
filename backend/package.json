@@ -7,8 +7,8 @@
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed": "ts-node src/scripts/seed.ts",
-    "seed:no-clear": "ts-node src/scripts/seed.ts --no-clear"
+    "seed": "node dist/scripts/seed.js",
+    "seed:no-clear": "node dist/scripts/seed.js --no-clear"
   },
   "keywords": [],
   "author": "",

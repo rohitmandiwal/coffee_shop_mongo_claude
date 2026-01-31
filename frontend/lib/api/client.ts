@@ -1,4 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use relative path so it works through Nginx proxy
+// In browser: empty base URL, endpoints already include /api/
+// In Node.js (server): full URL needed for internal Docker network
+const API_URL = typeof window !== 'undefined'
+  ? ''
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://backend:3001');
 
 export interface ApiResponse<T> {
   success: boolean;

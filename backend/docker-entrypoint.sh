@@ -1,37 +1,3 @@
-# Build stage
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY src ./src
-
-# Build TypeScript
-RUN npm run build
-
-# Production stage
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
-
-# Copy built application from builder
-COPY --from=builder /app/dist ./dist
-
-# Create entrypoint script
-RUN cat > /docker-entrypoint.sh << 'EOF' && chmod +x /docker-entrypoint.sh
 #!/bin/sh
 set -e
 
@@ -41,6 +7,7 @@ echo "=========================================="
 # Function to wait for MongoDB
 wait_for_mongo() {
     echo "⏳ Waiting for MongoDB to be ready..."
+
     local max_attempts=30
     local attempt=1
 
@@ -72,6 +39,7 @@ wait_for_mongo() {
 # Function to check if database has data
 check_database_data() {
     echo "🔍 Checking if database has data..."
+
     node -e "
         const { MongoClient } = require('mongodb');
         (async () => {
@@ -79,11 +47,14 @@ check_database_data() {
             try {
                 await client.connect();
                 const db = client.db();
+
+                // Check if menu collection exists and has documents
                 const collections = await db.listCollections({ name: 'menu' }).toArray();
                 if (collections.length === 0) {
                     console.log('EMPTY');
                     process.exit(0);
                 }
+
                 const menuCount = await db.collection('menu').countDocuments();
                 if (menuCount === 0) {
                     console.log('EMPTY');
@@ -100,6 +71,7 @@ check_database_data() {
     "
 }
 
+# Main execution
 echo ""
 echo "Step 1: Wait for MongoDB"
 wait_for_mongo
@@ -126,18 +98,5 @@ echo "🎯 Starting Coffee Shop Backend..."
 echo "=========================================="
 echo ""
 
+# Execute the main command (passed as arguments to the script)
 exec "$@"
-EOF
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-
-# Expose port
-EXPOSE 3001
-
-# Set entrypoint
-ENTRYPOINT ["/docker-entrypoint.sh"]
-
-# Start application (passed to entrypoint)
-CMD ["node", "dist/index.js"]

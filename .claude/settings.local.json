@@ -11,7 +11,14 @@
       "Bash(npx create-next-app:*)",
       "Bash(chmod:*)",
       "Bash(npx ts-node --version)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker run:*)",
+      "Bash(curl:*)"
     ]
   }
 }

@@ -1,7 +1,11 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+# Accept build argument for API URL
+ARG NEXT_PUBLIC_API_URL=http://localhost
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Copy package files
 COPY package*.json ./
@@ -13,10 +17,10 @@ RUN npm ci
 COPY . .
 
 # Build Next.js application
-RUN npm run build
+RUN npm run build && mkdir -p /app/public
 
 # Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
