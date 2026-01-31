@@ -19,6 +19,7 @@ export interface Order {
   tax?: number;
   grandTotal: number;
   paymentMode?: string;
+  transactionId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -31,7 +32,8 @@ export interface CreateOrderRequest {
   }>;
   discount?: number;
   tax?: number;
-  paymentMode?: string;
+  paymentMode?: 'Cash' | 'UPI' | 'Card';
+  simulateStatus?: 'Success' | 'CardDeclined' | 'InsufficientFunds' | 'CardLimitExceeded';
 }
 
 export interface OrderFilters {

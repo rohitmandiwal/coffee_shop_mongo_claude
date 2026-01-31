@@ -41,6 +41,13 @@ export enum PaymentMode {
   Card = 'Card',
 }
 
+export enum PaymentStatus {
+  Success = 'Success',
+  CardDeclined = 'CardDeclined',
+  InsufficientFunds = 'InsufficientFunds',
+  CardLimitExceeded = 'CardLimitExceeded',
+}
+
 export interface Order {
   _id?: ObjectId;
   customerId: ObjectId;
@@ -55,6 +62,7 @@ export interface Order {
   grandTotal: number;
 
   paymentMode?: PaymentMode;
+  transactionId?: ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -66,4 +74,55 @@ export interface OrderItem {
   unitPriceSnapshot: number;
   quantity: number;
   lineTotal: number;
+}
+
+export interface Transaction {
+  _id?: ObjectId;
+  orderId?: ObjectId;
+  customerId: ObjectId;
+  amount: number;
+  paymentMode: PaymentMode;
+  status: PaymentStatus;
+  gatewayTransactionId: string;
+  gatewayResponse: string;
+  attemptedAt: Date;
+  completedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TopSellingItem {
+  menuItemId: string;
+  itemName: string;
+  totalQuantity: number;
+  totalRevenue: number;
+}
+
+export interface MostSoldCoffee {
+  menuItemId: string;
+  itemName: string;
+  totalQuantity: number;
+  totalRevenue: number;
+}
+
+export interface MostRegularCustomer {
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  orderCount: number;
+  totalSpend: number;
+}
+
+export interface SalesSummaryItem {
+  date: string;
+  totalOrders: number;
+  totalRevenue: number;
+  avgOrderValue: number;
+}
+
+export interface DashboardKPIs {
+  todayOrders: number;
+  todayRevenue: number;
+  topSellingItemToday: TopSellingItem | null;
+  mostRegularCustomerMTD: MostRegularCustomer | null;
 }

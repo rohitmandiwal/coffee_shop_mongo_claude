@@ -12,7 +12,10 @@ export const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'Order must have at least 1 item'),
   discount: z.number().nonnegative('Discount cannot be negative').optional(),
   tax: z.number().nonnegative('Tax cannot be negative').optional(),
-  paymentMode: z.nativeEnum(PaymentMode).optional(),
+  paymentMode: z.nativeEnum(PaymentMode).default(PaymentMode.Cash),
+  simulateStatus: z
+    .enum(['Success', 'CardDeclined', 'InsufficientFunds', 'CardLimitExceeded'])
+    .optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

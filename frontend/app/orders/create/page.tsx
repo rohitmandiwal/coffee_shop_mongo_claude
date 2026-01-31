@@ -40,6 +40,13 @@ export default function CreateOrderPage() {
   const [tax, setTax] = useState(0)
   const [submitting, setSubmitting] = useState(false)
 
+  // Payment
+  const [paymentMode, setPaymentMode] = useState<'Cash' | 'UPI' | 'Card'>('Cash')
+  const [simulateStatus, setSimulateStatus] = useState<
+    'Success' | 'CardDeclined' | 'InsufficientFunds' | 'CardLimitExceeded'
+  >('Success')
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+
   // Load customers
   useEffect(() => {
     const loadCustomers = async () => {
@@ -116,6 +123,8 @@ export default function CreateOrderPage() {
       return
     }
 
+    setPaymentError(null)
+
     try {
       setSubmitting(true)
       const order = await createOrder({
@@ -126,15 +135,19 @@ export default function CreateOrderPage() {
         })),
         discount: discount > 0 ? discount : undefined,
         tax: tax > 0 ? tax : undefined,
+        paymentMode,
+        simulateStatus,
       })
 
       addToast({ type: 'success', title: 'Success', description: 'Order created successfully' })
       router.push(`/orders/${order._id}`)
     } catch (error: any) {
+      const errorMsg = error.message || 'Failed to create order'
+      setPaymentError(errorMsg)
       addToast({
         type: 'error',
         title: 'Error',
-        description: error.message || 'Failed to create order',
+        description: errorMsg,
       })
     } finally {
       setSubmitting(false)
@@ -189,6 +202,19 @@ export default function CreateOrderPage() {
               <p className="text-sm text-gray-600">{selectedCustomer.phone}</p>
               {selectedCustomer.email && (
                 <p className="text-sm text-gray-600">{selectedCustomer.email}</p>
+              )}
+              {/* Customer Notes - Display if notes exist */}
+              {selectedCustomer.notes && selectedCustomer.notes.trim() && (
+                <div className="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                  <div className="flex items-start gap-2">
+                    <span className="text-yellow-700 font-medium text-sm flex-shrink-0">
+                      📝 Note:
+                    </span>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                      {selectedCustomer.notes}
+                    </p>
+                  </div>
+                </div>
               )}
               <Button
                 variant="ghost"
@@ -297,6 +323,67 @@ export default function CreateOrderPage() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Details</CardTitle>
+          <CardDescription>Select payment method and simulation state</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="paymentMode" className="block text-sm font-medium">
+                Payment Method
+              </label>
+              <select
+                id="paymentMode"
+                value={paymentMode}
+                onChange={(e) => setPaymentMode(e.target.value as 'Cash' | 'UPI' | 'Card')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="simulateStatus" className="block text-sm font-medium">
+                Simulate Payment Result (Testing)
+              </label>
+              <select
+                id="simulateStatus"
+                value={simulateStatus}
+                onChange={(e) =>
+                  setSimulateStatus(
+                    e.target.value as
+                      | 'Success'
+                      | 'CardDeclined'
+                      | 'InsufficientFunds'
+                      | 'CardLimitExceeded'
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="Success">✅ Success</option>
+                <option value="CardDeclined">❌ Card Declined</option>
+                <option value="InsufficientFunds">💳 Insufficient Funds</option>
+                <option value="CardLimitExceeded">📊 Card Limit Exceeded</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                This simulates different payment scenarios for testing
+              </p>
+            </div>
+          </div>
+
+          {paymentError && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm font-medium text-red-900">{paymentError}</p>
             </div>
           )}
         </CardContent>

@@ -2,9 +2,10 @@ import { ObjectId } from 'mongodb';
 import { orderRepository } from '../repositories/order.repository';
 import { menuRepository } from '../repositories/menu.repository';
 import { customerRepository } from '../repositories/customer.repository';
-import { Order, OrderStatus } from '../types/entities.types';
+import { Order, OrderStatus, PaymentStatus } from '../types/entities.types';
 import { NotFoundError, AppError } from '../types/errors.types';
 import { CreateOrderInput, UpdateOrderStatusInput, OrderFilterInput } from '../schemas/order.schema';
+import { paymentService } from './payment.service';
 
 export class OrderService {
   async createOrder(input: CreateOrderInput): Promise<Order> {
@@ -50,18 +51,41 @@ export class OrderService {
     const tax = input.tax || 0;
     const grandTotal = subTotal - discount + tax;
 
-    // Create order
+    // Process payment BEFORE creating order
+    const transaction = await paymentService.processPayment({
+      customerId: input.customerId,
+      amount: grandTotal,
+      paymentMode: input.paymentMode || 'Cash',
+      simulateStatus: input.simulateStatus || 'Success',
+    });
+
+    // If payment failed, throw error (order won't be created)
+    if (transaction.status !== PaymentStatus.Success) {
+      throw new AppError(
+        `Payment failed: ${transaction.gatewayResponse}`,
+        400,
+        'PAYMENT_FAILED'
+      );
+    }
+
+    // Payment succeeded - create order with "Paid" status
     const order = await orderRepository.create({
       customerId: new ObjectId(input.customerId),
       orderDate: new Date(),
-      status: OrderStatus.Created,
+      status: OrderStatus.Paid,
       items: orderItems,
       subTotal,
       discount: discount > 0 ? discount : undefined,
       tax: tax > 0 ? tax : undefined,
       grandTotal,
       paymentMode: input.paymentMode,
+      transactionId: transaction._id,
     });
+
+    // Link transaction to order
+    if (transaction._id && order._id) {
+      await paymentService.linkTransactionToOrder(transaction._id, order._id);
+    }
 
     return order;
   }

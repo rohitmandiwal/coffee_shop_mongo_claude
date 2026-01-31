@@ -55,6 +55,13 @@ export async function createIndexes(database: Db): Promise<void> {
     await orderCollection.createIndex({ status: 1, orderDate: -1 });
     await orderCollection.createIndex({ createdAt: -1 });
 
+    const transactionCollection = database.collection('transactions');
+    await transactionCollection.createIndex({ customerId: 1, createdAt: -1 });
+    await transactionCollection.createIndex({ orderId: 1 });
+    await transactionCollection.createIndex({ status: 1, createdAt: -1 });
+    await transactionCollection.createIndex({ gatewayTransactionId: 1 }, { unique: true });
+    await transactionCollection.createIndex({ createdAt: -1 });
+
     logger.info('Database indexes created successfully');
   } catch (error) {
     logger.warn('Error creating indexes', error);

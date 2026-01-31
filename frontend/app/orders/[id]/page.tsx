@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/components/ui/toast'
 import { getOrderById, updateOrderStatus, Order } from '@/lib/api/order'
+import { transactionApi, Transaction } from '@/lib/api/transaction'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils/format'
 
 export default function OrderDetailsPage() {
@@ -16,16 +17,27 @@ export default function OrderDetailsPage() {
   const router = useRouter()
   const orderId = params.id as string
   const [order, setOrder] = useState<Order | null>(null)
+  const [transaction, setTransaction] = useState<Transaction | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const { addToast } = useToast()
 
   useEffect(() => {
-    const loadOrder = async () => {
+    const loadOrderAndTransaction = async () => {
       try {
         setLoading(true)
-        const data = await getOrderById(orderId)
-        setOrder(data)
+        const orderData = await getOrderById(orderId)
+        setOrder(orderData)
+
+        // Load transaction if it exists
+        if (orderData.transactionId) {
+          try {
+            const txData = await transactionApi.getById(orderData.transactionId)
+            setTransaction(txData)
+          } catch (error) {
+            console.error('Failed to load transaction:', error)
+          }
+        }
       } catch (error) {
         addToast({
           type: 'error',
@@ -37,7 +49,7 @@ export default function OrderDetailsPage() {
       }
     }
 
-    loadOrder()
+    loadOrderAndTransaction()
   }, [orderId])
 
   const handleMarkAsPaid = async () => {
@@ -157,6 +169,56 @@ export default function OrderDetailsPage() {
         </Card>
       </div>
 
+      {/* Transaction Details */}
+      {transaction && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Transaction</CardTitle>
+            <CardDescription>Transaction details and status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Transaction ID</p>
+                <p className="text-sm font-mono mt-1">{transaction.gatewayTransactionId}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Status</p>
+                <div className="mt-1">
+                  <Badge
+                    variant={
+                      transaction.status === 'Success' ? 'success' : 'destructive'
+                    }
+                  >
+                    {transaction.status}
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Payment Mode</p>
+                <p className="text-sm mt-1">{transaction.paymentMode}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Amount</p>
+                <p className="text-sm font-semibold mt-1">{formatCurrency(transaction.amount)}</p>
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <p className="text-sm font-medium text-gray-600">Gateway Response</p>
+                <p className="text-sm mt-1">{transaction.gatewayResponse}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Processed At</p>
+                <p className="text-sm mt-1">
+                  {formatDateTime(
+                    transaction.completedAt || transaction.attemptedAt
+                  )}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Items */}
       <Card>
         <CardHeader>
@@ -188,18 +250,6 @@ export default function OrderDetailsPage() {
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      {order.status === 'Created' && (
-        <div className="flex gap-2">
-          <Button
-            onClick={handleMarkAsPaid}
-            disabled={updating}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            {updating ? 'Processing...' : 'Mark as Paid'}
-          </Button>
-        </div>
-      )}
     </div>
   )
 }
